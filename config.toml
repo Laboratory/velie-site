@@ -1,0 +1,34 @@
+baseURL = 'https://velie.ru/'
+languageCode = 'ru-ru'
+title = 'Velie Backup'
+disableKinds = ["sitemap", "RSS"]
+theme = "hugo-webslides"
+tags = ["Бэкап"]
+features = ["webslides.js", "pre-made template", "shortcodes"]
+staticDir=["public"]
+
+[params]
+    author = "Velie team"
+    homepage = "velie.ru"
+
+
+[params.webslides]
+    banner = false
+    slideshow = true
+    vertical = true
+    autoslide = false
+    changeOnClick = false
+    disableLoop = false
+    minWheelDelta = 40
+    disableNavigateOnScroll = false
+    scrollWait = 450
+    slideOffset = 50
+    hideIndex = false
+
+[markup]
+    [markup.goldmark]
+        [markup.goldmark.parser]
+            [markup.goldmark.parser.attribute]
+                block = true
+        [markup.goldmark.renderer]
+            unsafe = true

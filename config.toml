@@ -13,7 +13,7 @@ staticDir=["public"]
 
 
 [params.webslides]
-    banner = false
+    banner = true
     slideshow = true
     vertical = true
     autoslide = false

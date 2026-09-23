@@ -1,8 +1,8 @@
 name: Publish velie.ru
 
-# Root: the files of this repo (current velie.ru page, CNAME, Yandex files).
-# /mockup/: the redesign mockup pulled from the private Laboratory/velie-src
-# with a read-only deploy key. Sources never live in this public repo.
+# The site is pulled from the private Laboratory/velie-src with a read-only
+# deploy key; this public repo only keeps CNAME, Yandex verification, icons
+# and this workflow. Sources never live here.
 on:
   push:
     branches: [main]
@@ -38,12 +38,17 @@ jobs:
           persist-credentials: false
       - name: Assemble
         run: |
-          mkdir _site
-          rsync -a --exclude .git --exclude .github --exclude README.md site/ _site/
-          rsync -a --exclude tools --exclude package.json src/mockup/ _site/mockup/
-          [ -n "$(tail -c1 _site/robots.txt)" ] && echo >> _site/robots.txt
-          echo 'Disallow: /mockup/' >> _site/robots.txt
-          echo "mockup $(git -C src rev-parse --short HEAD)" > _site/mockup/version.txt
+          mkdir -p _site/images
+          # the site itself comes from the private repo
+          rsync -a --exclude tools --exclude package.json src/site/ _site/
+          # domain, search-engine verification and icons stay in this repo
+          cp site/CNAME site/yandex_*.html _site/
+          rsync -a site/images/favicon _site/images/
+          printf 'User-agent: *\nAllow: /\n' > _site/robots.txt
+          # old /mockup/ links keep working
+          mkdir -p _site/mockup
+          printf '<!doctype html><meta charset="utf-8"><title>Velie</title><link rel="canonical" href="https://velie.ru/"><meta http-equiv="refresh" content="0; url=/"><a href="/">velie.ru</a>\n' > _site/mockup/index.html
+          echo "site $(git -C src rev-parse --short HEAD)" > _site/version.txt
           touch _site/.nojekyll
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3

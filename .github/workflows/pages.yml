@@ -1,0 +1,52 @@
+name: Publish velie.ru
+
+# Root: the files of this repo (current velie.ru page, CNAME, Yandex files).
+# /mockup/: the redesign mockup pulled from the private Laboratory/velie-src
+# with a read-only deploy key. Sources never live in this public repo.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+  schedule:
+    - cron: '0 */6 * * *'
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: site
+      - name: Checkout private sources
+        uses: actions/checkout@v4
+        with:
+          repository: Laboratory/velie-src
+          ssh-key: ${{ secrets.VELIE_SRC_KEY }}
+          path: src
+          persist-credentials: false
+      - name: Assemble
+        run: |
+          mkdir _site
+          rsync -a --exclude .git --exclude .github --exclude README.md site/ _site/
+          rsync -a --exclude tools --exclude package.json src/mockup/ _site/mockup/
+          printf '\nDisallow: /mockup/\n' >> _site/robots.txt
+          echo "mockup $(git -C src rev-parse --short HEAD)" > _site/mockup/version.txt
+          touch _site/.nojekyll
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+      - id: deployment
+        uses: actions/deploy-pages@v4

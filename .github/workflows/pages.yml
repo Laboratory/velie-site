@@ -41,7 +41,8 @@ jobs:
           mkdir _site
           rsync -a --exclude .git --exclude .github --exclude README.md site/ _site/
           rsync -a --exclude tools --exclude package.json src/mockup/ _site/mockup/
-          printf '\nDisallow: /mockup/\n' >> _site/robots.txt
+          [ -n "$(tail -c1 _site/robots.txt)" ] && echo >> _site/robots.txt
+          echo 'Disallow: /mockup/' >> _site/robots.txt
           echo "mockup $(git -C src rev-parse --short HEAD)" > _site/mockup/version.txt
           touch _site/.nojekyll
       - uses: actions/configure-pages@v5
